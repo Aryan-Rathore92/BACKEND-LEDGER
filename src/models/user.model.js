@@ -28,19 +28,21 @@ const userSchema = new mongoose.Schema(
 }
 )
 
-userSchema.pre("save", async function (next){ // pre("save") is a Mongoose middleware (hook). It runs before a document is saved to the database.
+userSchema.pre("save", async function (){ // pre("save") is a Mongoose middleware (hook). It runs before a document is saved to the database.
 
     if(!this.isModified("password")){ // Here if password is not change then it call next() and this keyword refer to the creating current document
-        return next();
+        // return next();
     }
 
     const hash = await bcrypt.hash(this.password, 10); // plaintext ---hashing---> hash
     this.password = hash;
 
-    return next();
+    // return next();
 })
 
 userSchema.methods.comparePassword = async function (password){
+    console.log(password, this.password);
+    
        return   await bcrypt.compare(password, this.password); // Doing compare current entering and database saved password
 }
 

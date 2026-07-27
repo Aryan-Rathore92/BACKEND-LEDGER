@@ -41,8 +41,6 @@ userSchema.pre("save", async function (){ // pre("save") is a Mongoose middlewar
 })
 
 userSchema.methods.comparePassword = async function (password){
-    console.log(password, this.password);
-    
        return   await bcrypt.compare(password, this.password); // Doing compare current entering and database saved password
 }
 

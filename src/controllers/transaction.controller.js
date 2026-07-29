@@ -39,7 +39,7 @@ async function createTransaction(req, res) {
         _id: toAccount
     })
 
-    if(!fromAccount || !toAccount){
+    if(!fromUserAccount || !toUserAccount){
         return res.status(400).json({
             message: "Invalid fromAccount and toAccount"
         })
@@ -81,7 +81,7 @@ async function createTransaction(req, res) {
     /**
      * 3. Check Account status
      */
-    if(fromAccount.status !== "ACTIVE" || toAccount.status !== "ACTIVE"){
+    if(fromUserAccount.status !== "ACTIVE" || toUserAccount.status !== "ACTIVE"){
         return res.status(400).json({
             message: "Both fromAccount and toAccount must be ACTIVE to process transaction"
         })
@@ -144,3 +144,20 @@ async function createTransaction(req, res) {
 
 
 }
+
+async function createInitialFundsTransaction(req, res){
+        
+    const {toAccount, amount, idempotencyKey} = req.body;
+
+    if(!toAccount || !amount || !idempotencyKey){
+        return res.status(400).json({
+            message: "toAccount, amount and idempotencyKey are required"
+        })
+    }
+
+    
+
+
+}
+
+module.exports = {createTransaction, createInitialFundsTransaction};

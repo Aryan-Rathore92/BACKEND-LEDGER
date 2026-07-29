@@ -13,4 +13,8 @@ async function createAccountController(req, res){
     })
 }
 
-module.exports = {createAccountController};
+async function getUserAccountsController(req, res){
+     
+}
+
+module.exports = {createAccountController, getUserAccountsController};

@@ -155,6 +155,38 @@ async function createInitialFundsTransaction(req, res){
         })
     }
 
+    const toUserAccount = await accountModel.findOne({
+        _id: toAccount
+    })
+
+    if(!toUserAccount){
+        return res.status(400).json({
+            message: "Invalid toAccount"
+        })
+    }
+
+    const fromUserAccount = await accountModel.findOne({
+        systemUser: true,
+        user: req.user._id
+    })
+
+    if(!fromUserAccount){
+        return res.status(400).json({
+            message: "System user account not find"
+        })
+    }
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    const transaction = await transactionModel.create({
+        fromAccount: fromUserAccount._id,
+        toAccount,
+        amount,
+        idempotencyKey,
+        status: "PENDING"
+    }, { session });
+
     
 
 

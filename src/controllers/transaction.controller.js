@@ -101,16 +101,19 @@ async function createTransaction(req, res) {
     /**
      * 5. Create transaction (PENDING)
      */
+    let transaction;
+    
+    try {
     const session = await mongoose.startSession();
     session.startTransaction()
 
-    const transaction = new transactionModel({
+     transaction = (await transactionModel.create([{
         fromAccount,
         toAccount,
         amount,
         idempotencyKey,
         status: "PENDING"
-    });
+    }], { session }))[ 0 ];
 
     const debitLedgerEntry = await ledgerModel.create([{
         account: fromAccount,
@@ -119,6 +122,10 @@ async function createTransaction(req, res) {
         type: "DEBIT",
     }], { session });
 
+    (()=>{ // This is an IIFE in js
+        return new Promise((resolve)=> setTimeout(resolve, 100 * 1000))
+    })
+
     const creditLedgerEntry = await ledgerModel.create([{
         account: toAccount,
         amount: amount,
@@ -126,12 +133,23 @@ async function createTransaction(req, res) {
         type: "CREDIT",
     }], { session });
 
-    transaction.status = "COMPLETED";
-    await transaction.save({ session })
+
+    await transactionModel.findOneAndUpdate(
+        {_id: transaction._id},
+        {status: "COMPLETED"},
+        { session }
+    )
+    // transaction.status = "COMPLETED";
+    // await transaction.save({ session })
 
     await session.commitTransaction()
     session.endSession()
-
+    
+    } catch (error) {
+        return res.status(400).json({
+            message: "Transaction is pending due to some issue, please retry after some times"
+        })
+    }
     /**
      * 10. Send email notification
      */
